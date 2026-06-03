@@ -1,30 +1,58 @@
 # JHB Mobile App
 
-JHB Mobile App is a Flutter sermon library for mobile devices. It is built around searchable sermon transcripts, preloaded sermon metadata, synced audio playback, and a Laravel administration console for managing the library.
+JHB Mobile App is a Flutter-based mobile sermon library with searchable transcripts, synced audio playback, offline preload data, and a Laravel administration console for managing sermon content.
 
-The app is no longer a PDF book reader. PDF support may still exist in legacy code paths, but the main product direction is sermon-first: list sermons, search sermon text, open a sermon, read the transcript, and play audio from the selected paragraph.
+This project is no longer a PDF book reader. The current direction is sermon-first: users browse sermons, search transcript text, open a sermon, read the structured transcript, and play audio from the selected paragraph.
 
-## Main Features
+## Overview
 
-- Mobile sermon listing by date, title, length, book/category, and place.
+The system has two main parts:
+
+- **Mobile app**: Flutter application for offline sermon reading, searching, and audio playback.
+- **Admin console**: Laravel web application backed by MySQL for managing sermons, transcripts, audio metadata, timestamps, and mobile exports.
+
+The admin console is intended to become the source of truth. It exports a mobile-ready package that the Flutter app can preload and use offline.
+
+## Features
+
+- Sermon listing by date, title, length, category/book, and place.
 - Search across all sermons or inside the current sermon.
-- Search results open the sermon at the matching paragraph.
-- Sermon reader screen with transcript text, paragraph highlighting, and audio controls.
+- Clickable search results that open the sermon at the matching paragraph.
+- Sermon reader screen with structured transcript text.
+- Paragraph highlighting while reading or playing audio.
 - Tap a paragraph to seek and play audio from that paragraph position.
-- Preloaded mobile data using SQLite and JSON assets.
-- Offline-ready sermon library package.
-- Laravel web administration console backed by MySQL.
-- Export workflow from admin data to mobile preload package.
+- Preloaded mobile sermon data using SQLite and JSON assets.
+- Offline sermon access after the app is installed.
+- Laravel/MySQL admin console for managing sermon records.
+- Mobile export workflow from admin data to Flutter preload files.
 
-## Mobile Data Structure
+## Architecture
 
-The mobile app uses a sermon library package under:
+```text
+Laravel Admin Console
+        |
+        | manages sermons, transcripts, audio, timestamps
+        v
+MySQL Database
+        |
+        | export command
+        v
+Mobile Preload Package
+        |
+        | bundled with Flutter assets
+        v
+JHB Mobile App
+```
+
+## Mobile Data Package
+
+The mobile preload package lives under:
 
 ```text
 assets/preload/
 ```
 
-Important files:
+Important files and folders:
 
 ```text
 assets/preload/books.json
@@ -34,7 +62,11 @@ assets/preload/sermons/
 assets/preload/audios/
 ```
 
-The SQLite library contains:
+The Flutter app uses these files to show the sermon list, search transcript text, open sermons, and play audio offline.
+
+## Mobile SQLite Structure
+
+The mobile SQLite package contains:
 
 ```text
 sermons
@@ -45,31 +77,60 @@ bookmarks
 highlights
 ```
 
+Main table purpose:
+
+- `sermons`: sermon metadata such as title, preacher, date, place, language, category, audio file, duration, and mobile book id.
+- `sermon_paragraphs`: transcript paragraphs linked to sermons, including paragraph numbers and optional audio timestamps.
+- `sermon_search`: searchable transcript index used by the mobile search screen.
+- `downloads`: future support for downloaded audio tracking.
+- `bookmarks`: saved sermon or paragraph bookmarks.
+- `highlights`: saved text highlights.
+
+## Audio
+
 Audio files are stored as mobile assets under:
 
 ```text
 assets/preload/audios/
 ```
 
-Large audio files are tracked with Git LFS.
+Large audio files are tracked with Git LFS. Make sure Git LFS is installed before cloning or pulling the project:
 
-## Laravel Admin Console
+```powershell
+git lfs install
+git lfs pull
+```
 
-The administration console lives in:
+Because audio is bundled into the app, Android APK builds can be large. Emulators need enough internal storage before installing the app.
+
+## Admin Console
+
+The Laravel admin console lives in:
 
 ```text
 admin/
 ```
 
-It is a Laravel web app backed by MySQL. Use it to manage sermons, transcript paragraphs, audio metadata, timestamps, and exports.
-
-Admin capabilities include:
+It is used to manage the sermon system:
 
 - Create and edit sermons.
 - Upload or manage transcript text.
 - Add and update paragraph timestamps.
 - Manage audio file references.
 - Export the mobile preload package.
+
+The admin console is backed by MySQL. Its `.env` file is ignored and must be configured locally.
+
+## Admin Workflow
+
+Typical content workflow:
+
+1. Add or update a sermon in the Laravel admin console.
+2. Add transcript paragraphs.
+3. Add audio file metadata or upload audio.
+4. Add paragraph timestamp mappings where available.
+5. Export the mobile package.
+6. Rebuild or reinstall the Flutter app so the updated assets are included.
 
 Mobile export command:
 
@@ -85,6 +146,23 @@ assets/preload/sermon_library.sqlite
 assets/preload/books.json
 assets/preload/search_index.json
 ```
+
+## Requirements
+
+For the Flutter mobile app:
+
+- Flutter SDK
+- Dart SDK
+- Android Studio or Android SDK tools
+- Android emulator or physical Android device
+- Git LFS for sermon audio assets
+
+For the Laravel admin console:
+
+- PHP
+- Composer
+- MySQL
+- Node.js/npm if frontend assets need to be rebuilt
 
 ## Running the Flutter App
 
@@ -106,7 +184,7 @@ Build a debug APK:
 flutter build apk --debug
 ```
 
-Because the app includes preloaded audio, the APK can be large. On an emulator, make sure there is enough internal storage before installing.
+If the emulator appears stuck on the splash screen, wait a little longer on first launch. Large bundled assets can take time to extract and initialize.
 
 ## Running the Admin Console
 
@@ -144,9 +222,18 @@ http://127.0.0.1:8080
 ## Repository Notes
 
 - `admin/.env` is ignored and should not be committed.
-- `admin/vendor/`, Flutter build folders, emulator screenshots, and generated build artifacts are ignored.
-- Sermon audio assets are committed through Git LFS.
+- `admin/vendor/` is ignored.
+- Flutter build folders are ignored.
+- Emulator screenshots and generated build artifacts are ignored.
+- Sermon audio assets are tracked through Git LFS.
 - Raw duplicate source audio under `sources/Audios/` is ignored.
+
+## Known Limitations
+
+- APK size can be large because sermon audio is bundled.
+- iOS simulator testing requires macOS and Xcode.
+- Some legacy PDF-reader code still exists but is not the main product direction.
+- Accurate tap-to-audio playback depends on paragraph timestamp data being available.
 
 ## Project Direction
 
@@ -157,3 +244,8 @@ The goal is to make JHB Mobile App a complete sermon library system:
 - Offline mobile reading and listening.
 - Accurate paragraph-to-audio timestamp sync.
 - Searchable transcript text with clickable results.
+- Future support for bookmarks, highlights, notes, and managed audio downloads.
+
+## Ownership
+
+This repository is for the JHB Mobile App sermon library project.
