@@ -1,0 +1,135 @@
+{
+    "version": 1778925465,
+    "books": [
+        {
+            "id": "09-0602-god-s-training-character-is-not-a-gift",
+            "title": "God's Training Character Is Not A Gift",
+            "idCode": "09-0602",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0602-gods-training-character-is-not-a-gift.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-0604-the-glory-that-excelleth-1",
+            "title": "The Glory That Excelleth (1)",
+            "idCode": "09-0604",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0604-the-glory-that-excelleth-1.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-0702-friendship-associations-and-influences",
+            "title": "Friendship Associations And Influences",
+            "idCode": "09-0702",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0702-friendship-associations-and-influences.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-0807-conditions-for-restoration-of-blessings-part-1",
+            "title": "Conditions for Restoration of Blessings (Part 1)",
+            "idCode": "09-0807",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0807-conditions-for-restoration-of-blessings-part-1.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-0915-the-revelation-part-2",
+            "title": "The Revelation (Part 2)",
+            "idCode": "09-0915",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0915-the-revelation-part-2.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-0916-the-revelation-part-3",
+            "title": "THE REVELATION (PART 3)",
+            "idCode": "09-0916",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-0916-the-revelation-part-3.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-1002-the-revelation-prt-14",
+            "title": "The Revelation prt 14",
+            "idCode": "09-1002",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-1002-the-revelation-prt-14.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "09-1107-family-spirits-prt-1",
+            "title": "Family Spirits Prt 1",
+            "idCode": "09-1107",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/09-1107-family-spirits-prt-1.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "10-0625-nzvimbo-tsvene-part-3-believers-their-children",
+            "title": "Nzvimbo Tsvene (Part 3)- (Believers & Their Children)",
+            "idCode": "10-0625",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/10-0625-nzvimbo-tsvene-part-3-believers-their-children.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "10-0626-a-father-s-right-part-1",
+            "title": "A Father's Right (Part 1)",
+            "idCode": "10-0626",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/10-0626-a-fathers-right-part-1.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "10-0627-a-father-s-right-part-2",
+            "title": "A Father's Right (Part 2)",
+            "idCode": "10-0627",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/10-0627-a-fathers-right-part-2.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "11-1230-marriage-is-honourable",
+            "title": "Marriage Is Honourable",
+            "idCode": "11-1230",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/11-1230-marriage-is-honourable.mp3",
+            "category": "sermon",
+            "language": "en"
+        },
+        {
+            "id": "12-0121-mfjvoixm",
+            "title": "Ratidziro Part 1",
+            "idCode": "12-0121",
+            "location": "JHB, Harare",
+            "duration": "TIME: 0:00",
+            "audio": "assets/preload/audios/12-0121-HrxxZvnT.mp3",
+            "category": "sermon",
+            "language": "SHO"
+        }
+    ]
+}

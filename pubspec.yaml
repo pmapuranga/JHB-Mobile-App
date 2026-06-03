@@ -1,0 +1,45 @@
+name: pdf_reader_app
+description: A new Flutter project for reading PDF books
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  pdfrx: ^1.0.65
+  file_picker: ^8.0.0+1
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.1
+  path: ^1.9.0
+  provider: ^6.1.1
+  sqflite: ^2.3.3
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  cupertino_icons: ^1.0.2
+  url_launcher: ^6.2.1
+  share_plus: ^7.2.1
+  just_audio: ^0.10.5
+  just_audio_windows: ^0.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/preload/books.json
+    - assets/preload/search_index.json
+    - assets/preload/sermon_library.sqlite
+    - assets/preload/sermons/
+    - assets/preload/audios/
+    - assets/preload/pdfs/

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 230" role="img" aria-labelledby="title desc">
+  <title id="title">JHB Sermon Admin logo</title>
+  <desc id="desc">A red eagle above an open book with gold light.</desc>
+  <rect width="420" height="230" fill="#ffffff"/>
+  <path d="M23 189c39-16 74-24 117-25 26 1 53 4 77 13-44-3-86 0-126 8-26 5-49 11-68 19z" fill="#d9231f"/>
+  <path d="M397 189c-39-16-74-24-117-25-26 1-53 4-77 13 44-3 86 0 126 8 26 5 49 11 68 19z" fill="#d9231f"/>
+  <path d="M22 176c49-45 97-69 150-76" fill="none" stroke="#5f2523" stroke-width="4" stroke-linecap="round"/>
+  <path d="M398 176c-49-45-97-69-150-76" fill="none" stroke="#5f2523" stroke-width="4" stroke-linecap="round"/>
+  <path d="M118 184c30-6 62-8 96-6 28 0 59 2 88 7-39-14-74-21-104-21-28 1-55 7-80 20z" fill="#f4f6f8"/>
+  <path d="M208 145c8-15 20-24 33-29 2 22-7 42-29 56-9-8-11-17-4-27z" fill="#f2c31b"/>
+  <path d="M208 62c-23-22-41-28-58-31 1 11 7 22 18 32-14-4-28-7-43-7 11 14 26 23 47 30-23 1-43 6-63 15 34 14 69 16 105 7 34-7 62-21 89-45-21 4-39 12-55 23 7-14 11-27 11-41-20 9-36 20-51 34z" fill="#c91d1d"/>
+  <path d="M201 62c-10-13-17-28-20-48 10 7 18 18 25 33 10-15 25-24 45-28-4 20-15 37-33 51z" fill="#d9231f"/>
+  <path d="M185 106c16 3 33 2 51-2-6 10-14 16-25 19-11 2-20-4-26-17z" fill="#f2c31b"/>
+  <path d="M203 126c3 8 7 15 12 21" fill="none" stroke="#b62522" stroke-width="4" stroke-linecap="round"/>
+  <path d="M190 145c-9 3-16 9-21 17m32-11c-3 10-9 18-18 25m40-31c10 4 17 11 22 20m-35-12c4 10 10 17 19 22" fill="none" stroke="#b62522" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="210" cy="133" r="13" fill="#f6c21a"/>
+  <path d="M204 129h12m-6-6v18" stroke="#c91d1d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M23 203c48-10 95-14 143-12 21 1 39 4 54 9-72-2-138 3-197 14zM397 203c-48-10-95-14-143-12-21 1-39 4-54 9 72-2 138 3 197 14z" fill="#efefef"/>
+</svg>
