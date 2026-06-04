@@ -41,5 +41,4 @@ flutter:
     - assets/preload/search_index.json
     - assets/preload/sermon_library.sqlite
     - assets/preload/sermons/
-    - assets/preload/audios/
     - assets/preload/pdfs/

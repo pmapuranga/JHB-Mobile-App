@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../models/sermon.dart';
 import '../models/sermon_paragraph.dart';
@@ -47,6 +50,7 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
   Duration _audioDuration = Duration.zero;
   Map<int, _ParagraphAudioRange> _estimatedParagraphRanges = {};
   bool _isAudioLoading = false;
+  bool _isAudioDownloading = false;
   String? _loadedAudioAsset;
 
   @override
@@ -162,13 +166,30 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
   }
 
   Future<void> _loadAudioForSermon(Sermon? sermon) async {
-    final audioAsset = sermon?.audioFile.trim() ?? '';
-    if (audioAsset.isEmpty || audioAsset == _loadedAudioAsset) {
+    final audioSource = sermon?.audioFile.trim() ?? '';
+    if (audioSource.isEmpty) {
       if (mounted && sermon != null && _audioDuration == Duration.zero) {
         setState(() {
           _audioDuration = Duration(seconds: sermon.durationSeconds);
         });
       }
+      return;
+    }
+
+    final localAudio = await _localAudioFileForSermon(sermon);
+    if (_isRemoteAudio(audioSource) &&
+        (localAudio == null || !await localAudio.exists())) {
+      if (mounted) {
+        setState(() {
+          _loadedAudioAsset = null;
+          _audioDuration = Duration(seconds: sermon?.durationSeconds ?? 0);
+          _isAudioLoading = false;
+        });
+      }
+      return;
+    }
+
+    if (audioSource == _loadedAudioAsset) {
       return;
     }
 
@@ -180,10 +201,14 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
         _audioDuration = Duration(seconds: sermon?.durationSeconds ?? 0);
       });
       await _audioPlayer.stop();
-      final duration = await _audioPlayer.setAsset(audioAsset);
+      final duration = localAudio != null && await localAudio.exists()
+          ? await _audioPlayer.setFilePath(localAudio.path)
+          : _isRemoteAudio(audioSource)
+              ? null
+              : await _audioPlayer.setAsset(audioSource);
       if (!mounted) return;
       setState(() {
-        _loadedAudioAsset = audioAsset;
+        _loadedAudioAsset = audioSource;
         _audioDuration =
             duration ?? Duration(seconds: sermon?.durationSeconds ?? 0);
         _estimatedParagraphRanges = _buildEstimatedParagraphRanges(
@@ -206,6 +231,12 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
     final sermon = _sermon;
     if (sermon == null || sermon.audioFile.trim().isEmpty) {
       _showAudioMessage('Audio not available for this sermon');
+      return;
+    }
+
+    if (_isRemoteAudio(sermon.audioFile) &&
+        !await _isAudioDownloadedForSermon(sermon)) {
+      _showAudioMessage('Download this sermon audio first');
       return;
     }
 
@@ -247,6 +278,12 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
       return;
     }
 
+    if (_isRemoteAudio(sermon.audioFile) &&
+        !await _isAudioDownloadedForSermon(sermon)) {
+      _showAudioMessage('Download this sermon audio first');
+      return;
+    }
+
     if (_loadedAudioAsset != sermon.audioFile.trim()) {
       await _loadAudioForSermon(sermon);
     }
@@ -277,6 +314,97 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
     }
     await _audioPlayer.seek(position);
     await _audioPlayer.play();
+  }
+
+  Future<void> _downloadAudioForCurrentSermon() async {
+    final sermon = _sermon;
+    if (sermon == null || sermon.audioFile.trim().isEmpty) {
+      _showAudioMessage('Audio not available for this sermon');
+      return;
+    }
+
+    final audioUrl = sermon.audioFile.trim();
+    if (!_isRemoteAudio(audioUrl)) {
+      _showAudioMessage('Audio is already packaged with this sermon');
+      return;
+    }
+
+    final target = await _downloadTargetForSermon(sermon);
+    if (await target.exists()) {
+      _showAudioMessage('Audio already downloaded');
+      await _loadAudioForSermon(sermon);
+      return;
+    }
+
+    final partial = File('${target.path}.part');
+    try {
+      setState(() => _isAudioDownloading = true);
+      await target.parent.create(recursive: true);
+
+      final client = HttpClient();
+      final request = await client.getUrl(Uri.parse(audioUrl));
+      final response = await request.close();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw HttpException('HTTP ${response.statusCode}',
+            uri: Uri.parse(audioUrl));
+      }
+
+      await response.pipe(partial.openWrite());
+      client.close(force: true);
+
+      if (await target.exists()) {
+        await target.delete();
+      }
+      await partial.rename(target.path);
+      if (!mounted) return;
+      setState(() => _isAudioDownloading = false);
+      _showAudioMessage('Audio downloaded');
+      await _loadAudioForSermon(sermon);
+    } catch (_) {
+      if (await partial.exists()) {
+        await partial.delete();
+      }
+      if (!mounted) return;
+      setState(() => _isAudioDownloading = false);
+      _showAudioMessage('Could not download sermon audio');
+    }
+  }
+
+  Future<bool> _isAudioDownloadedForSermon(Sermon sermon) async {
+    final local = await _localAudioFileForSermon(sermon);
+    return local != null && await local.exists();
+  }
+
+  Future<File?> _localAudioFileForSermon(Sermon? sermon) async {
+    if (sermon == null || !_isRemoteAudio(sermon.audioFile)) return null;
+    return _downloadTargetForSermon(sermon);
+  }
+
+  Future<File> _downloadTargetForSermon(Sermon sermon) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final audioDir = Directory(p.join(dir.path, 'downloaded_audio'));
+    final uri = Uri.parse(sermon.audioFile.trim());
+    final rawName = uri.pathSegments.isEmpty ? '' : uri.pathSegments.last;
+    final extension =
+        p.extension(rawName).isEmpty ? '.mp3' : p.extension(rawName);
+    final code =
+        sermon.code.trim().isEmpty ? sermon.id.toString() : sermon.code;
+    final filename =
+        '${_safeFilePart(code)}-${_safeFilePart(sermon.title)}$extension';
+    return File(p.join(audioDir.path, filename));
+  }
+
+  bool _isRemoteAudio(String value) {
+    final uri = Uri.tryParse(value.trim());
+    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
+
+  String _safeFilePart(String value) {
+    final safe = value
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    return safe.isEmpty ? 'sermon' : safe;
   }
 
   Duration get _effectiveAudioDuration {
@@ -773,7 +901,10 @@ class _SermonReaderScreenState extends State<SermonReaderScreen> {
                 Icons.forward_10,
                 onTap: () => unawaited(_seekBy(const Duration(seconds: 10))),
               ),
-              _roundIcon(Icons.headset, onTap: () {}),
+              _roundIcon(
+                _isAudioDownloading ? Icons.downloading : Icons.headset,
+                onTap: () => unawaited(_downloadAudioForCurrentSermon()),
+              ),
             ],
           ),
           const SizedBox(height: 4),

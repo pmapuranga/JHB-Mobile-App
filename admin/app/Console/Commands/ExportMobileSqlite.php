@@ -54,7 +54,7 @@ class ExportMobileSqlite extends Command
             $pdo->beginTransaction();
             foreach ($sermons as $sermon) {
                 $mobileBookId = $this->mobileBookId($sermon);
-                $audioAsset = $this->mobileAudioAsset($sermon);
+                $audioReference = $this->mobileAudioReference($sermon);
                 $insertSermon->execute([
                     'sermon_id' => $sermon->sermon_id,
                     'code' => $sermon->code,
@@ -64,7 +64,7 @@ class ExportMobileSqlite extends Command
                     'place' => $sermon->place,
                     'language' => $sermon->language,
                     'category' => $sermon->category,
-                    'audio_file' => $audioAsset,
+                    'audio_file' => $audioReference,
                     'duration_seconds' => $sermon->duration_seconds,
                     'is_downloaded' => $sermon->is_downloaded ? 1 : 0,
                     'book_id' => 'preloaded:'.$mobileBookId,
@@ -135,14 +135,14 @@ class ExportMobileSqlite extends Command
 
         foreach ($sermons as $sermon) {
             $bookId = $this->mobileBookId($sermon);
-            $audioAsset = $this->mobileAudioAsset($sermon);
+            $audioReference = $this->mobileAudioReference($sermon);
             $books[] = [
                 'id' => $bookId,
                 'title' => $sermon->title,
                 'idCode' => $sermon->code ?? '',
                 'location' => $sermon->place ?: 'JHB, Harare',
                 'duration' => $this->formatDuration((int) $sermon->duration_seconds),
-                'audio' => $audioAsset,
+                'audio' => $audioReference,
                 'category' => $sermon->category ?: 'sermon',
                 'language' => $sermon->language ?: 'en',
             ];
@@ -187,40 +187,24 @@ class ExportMobileSqlite extends Command
         return Str::slug(trim(($sermon->code ?? '').' '.$sermon->title));
     }
 
-    private function mobileAudioAsset(Sermon $sermon): string
+    private function mobileAudioReference(Sermon $sermon): string
     {
         $audioFile = trim((string) $sermon->audio_file);
         if ($audioFile === '') {
             return '';
         }
 
-        if (Str::startsWith($audioFile, 'assets/preload/audios/')) {
+        if (Str::startsWith($audioFile, ['http://', 'https://'])) {
             return $audioFile;
         }
 
         $filename = basename($audioFile);
-        $targetDir = base_path('../assets/preload/audios');
-        $targetPath = $targetDir.DIRECTORY_SEPARATOR.$filename;
-        File::ensureDirectoryExists($targetDir);
-
-        $candidates = [
-            storage_path('app/public/audios/'.$audioFile),
-            storage_path('app/public/'.$audioFile),
-            base_path('../assets/preload/audios/'.$audioFile),
-            base_path('../assets/preload/audios/'.$filename),
-        ];
-
-        foreach ($candidates as $candidate) {
-            if (is_file($candidate)) {
-                if (realpath($candidate) !== realpath($targetPath)) {
-                    File::copy($candidate, $targetPath);
-                }
-
-                return 'assets/preload/audios/'.$filename;
-            }
+        $baseUrl = rtrim((string) env('MOBILE_AUDIO_BASE_URL', ''), '/');
+        if ($baseUrl !== '') {
+            return $baseUrl.'/'.rawurlencode($filename);
         }
 
-        return $audioFile;
+        return '';
     }
 
     private function formatDuration(int $seconds): string

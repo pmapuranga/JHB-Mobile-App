@@ -21,6 +21,7 @@ The admin console is intended to become the source of truth. It exports a mobile
 - Sermon reader screen with structured transcript text.
 - Paragraph highlighting while reading or playing audio.
 - Tap a paragraph to seek and play audio from that paragraph position.
+- Download audio for the sermon currently being read.
 - Preloaded mobile sermon data using SQLite and JSON assets.
 - Offline sermon access after the app is installed.
 - Laravel/MySQL admin console for managing sermon records.
@@ -39,7 +40,7 @@ MySQL Database
         v
 Mobile Preload Package
         |
-        | bundled with Flutter assets
+        | bundled text/search data plus downloadable audio URLs
         v
 JHB Mobile App
 ```
@@ -59,10 +60,9 @@ assets/preload/books.json
 assets/preload/search_index.json
 assets/preload/sermon_library.sqlite
 assets/preload/sermons/
-assets/preload/audios/
 ```
 
-The Flutter app uses these files to show the sermon list, search transcript text, open sermons, and play audio offline.
+The Flutter app uses these files to show the sermon list, search transcript text, and open sermons offline. Audio is downloaded on demand when the user is reading a sermon.
 
 ## Mobile SQLite Structure
 
@@ -88,20 +88,17 @@ Main table purpose:
 
 ## Audio
 
-Audio files are stored as mobile assets under:
+Audio should be hosted outside the APK and referenced by URL in the exported mobile package. This keeps Android APK builds smaller and avoids emulator storage issues.
+
+When the user opens a sermon, the reader can download only that sermon audio. The downloaded file is saved locally on the device and reused for playback.
+
+Configure the public audio base URL in the admin `.env` file:
 
 ```text
-assets/preload/audios/
+MOBILE_AUDIO_BASE_URL=https://example.com/audio
 ```
 
-Large audio files are tracked with Git LFS. Make sure Git LFS is installed before cloning or pulling the project:
-
-```powershell
-git lfs install
-git lfs pull
-```
-
-Because audio is bundled into the app, Android APK builds can be large. Emulators need enough internal storage before installing the app.
+If a sermon already has a full `https://...` audio URL, the export keeps that URL. Otherwise, the export builds the mobile audio URL from `MOBILE_AUDIO_BASE_URL` and the sermon audio filename.
 
 ## Admin Console
 
@@ -129,8 +126,9 @@ Typical content workflow:
 2. Add transcript paragraphs.
 3. Add audio file metadata or upload audio.
 4. Add paragraph timestamp mappings where available.
-5. Export the mobile package.
-6. Rebuild or reinstall the Flutter app so the updated assets are included.
+5. Publish the audio file to the configured public audio location.
+6. Export the mobile package.
+7. Rebuild or reinstall the Flutter app so the updated text/search assets are included.
 
 Mobile export command:
 
@@ -155,7 +153,6 @@ For the Flutter mobile app:
 - Dart SDK
 - Android Studio or Android SDK tools
 - Android emulator or physical Android device
-- Git LFS for sermon audio assets
 
 For the Laravel admin console:
 
@@ -184,7 +181,7 @@ Build a debug APK:
 flutter build apk --debug
 ```
 
-If the emulator appears stuck on the splash screen, wait a little longer on first launch. Large bundled assets can take time to extract and initialize.
+The APK should remain smaller when audio is hosted externally and downloaded per sermon.
 
 ## Running the Admin Console
 
@@ -225,12 +222,12 @@ http://127.0.0.1:8080
 - `admin/vendor/` is ignored.
 - Flutter build folders are ignored.
 - Emulator screenshots and generated build artifacts are ignored.
-- Sermon audio assets are tracked through Git LFS.
+- Sermon audio should be hosted externally for mobile download.
 - Raw duplicate source audio under `sources/Audios/` is ignored.
 
 ## Known Limitations
 
-- APK size can be large because sermon audio is bundled.
+- Audio download requires a reachable public audio URL.
 - iOS simulator testing requires macOS and Xcode.
 - Some legacy PDF-reader code still exists but is not the main product direction.
 - Accurate tap-to-audio playback depends on paragraph timestamp data being available.
@@ -241,7 +238,7 @@ The goal is to make JHB Mobile App a complete sermon library system:
 
 - Laravel/MySQL admin console as the source of truth.
 - Mobile SQLite/asset package exported from the admin console.
-- Offline mobile reading and listening.
+- Offline mobile reading, with audio available after per-sermon download.
 - Accurate paragraph-to-audio timestamp sync.
 - Searchable transcript text with clickable results.
 - Future support for bookmarks, highlights, notes, and managed audio downloads.
